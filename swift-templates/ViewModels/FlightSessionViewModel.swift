@@ -18,6 +18,17 @@ class FlightSessionViewModel: ObservableObject {
     private let sessionKey = "currentFlightSession"
     private let settingsKey = "appSettings"
 
+    // MARK: - Computed Properties
+
+    var allAircraft: [Aircraft] {
+        storageService.loadAircraft()
+    }
+
+    var selectedAircraft: Aircraft? {
+        guard let aircraftId = session.selectedAircraftId else { return nil }
+        return allAircraft.first { $0.id == aircraftId }
+    }
+
     init() {
         // Load settings
         if let saved: AppSettings = storageService.load(key: settingsKey) {
