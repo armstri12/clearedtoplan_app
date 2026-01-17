@@ -41,10 +41,10 @@ struct WeightBalanceCalculation: Equatable {
         var j = envelope.count - 1
 
         for i in 0..<envelope.count {
-            let xi = envelope[i].arm
-            let yi = envelope[i].weight
-            let xj = envelope[j].arm
-            let yj = envelope[j].weight
+            let xi = envelope[i].cgIn
+            let yi = envelope[i].weightLb
+            let xj = envelope[j].cgIn
+            let yj = envelope[j].weightLb
 
             if ((yi > weight) != (yj > weight)) &&
                (cg < (xj - xi) * (weight - yi) / (yj - yi) + xi) {
