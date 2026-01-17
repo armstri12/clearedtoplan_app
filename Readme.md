@@ -33,6 +33,8 @@ This is a native iOS version of the [Cleared to Plan web application](https://gi
 - Xcode 15.0 or later
 - iPad simulator or physical iPad for testing
 
+**Windows Users:** See [MACINCLOUD_SETUP.md](MACINCLOUD_SETUP.md) for cloud Mac setup (~$30-50/month)
+
 ### Quick Start
 
 1. **Read the Quick Start Guide**
@@ -61,6 +63,7 @@ This is a native iOS version of the [Cleared to Plan web application](https://gi
 - **[QUICKSTART.md](QUICKSTART.md)** - Fast 3-step setup guide
 - **[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)** - Comprehensive development plan with architecture details
 - **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed Xcode setup and development workflow
+- **[MACINCLOUD_SETUP.md](MACINCLOUD_SETUP.md)** - Windows users guide for cloud Mac development
 
 ## Project Structure
 
