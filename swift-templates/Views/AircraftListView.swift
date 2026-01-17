@@ -33,7 +33,7 @@ struct AircraftListView: View {
                 }
             }
             .sheet(isPresented: $showingAddAircraft) {
-                AircraftFormView(aircraft: nil) { newAircraft in
+                AircraftDetailView(aircraft: nil) { newAircraft in
                     viewModel.addAircraft(newAircraft)
                     showingAddAircraft = false
                 }
@@ -119,60 +119,6 @@ struct AircraftRow: View {
     }
 }
 
-struct AircraftFormView: View {
-    let aircraft: Aircraft?
-    let onSave: (Aircraft) -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var registration = ""
-    @State private var type = ""
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Basic Information") {
-                    TextField("Name (e.g., Skyhawk)", text: $name)
-                    TextField("Registration (e.g., N12345)", text: $registration)
-                    TextField("Type (e.g., C-172S)", text: $type)
-                }
-            }
-            .navigationTitle(aircraft == nil ? "Add Aircraft" : "Edit Aircraft")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveAircraft()
-                    }
-                    .disabled(name.isEmpty || registration.isEmpty)
-                }
-            }
-        }
-        .onAppear {
-            if let aircraft {
-                name = aircraft.name
-                registration = aircraft.registration
-                type = aircraft.type
-            }
-        }
-    }
-
-    private func saveAircraft() {
-        let newAircraft = Aircraft(
-            name: name,
-            registration: registration,
-            type: type
-        )
-        onSave(newAircraft)
-        dismiss()
-    }
-}
 
 // Placeholder ViewModel
 @MainActor
