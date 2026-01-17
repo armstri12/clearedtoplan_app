@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class StorageService {
     static let shared = StorageService()
 
