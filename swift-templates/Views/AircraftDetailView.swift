@@ -2,7 +2,7 @@
 //  AircraftDetailView.swift
 //  ClearedToPlan
 //
-//  Comprehensive aircraft profile editor
+//  Comprehensive aircraft profile editor with clear tab navigation
 //
 
 import SwiftUI
@@ -23,29 +23,37 @@ struct AircraftDetailView: View {
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $selectedTab) {
-                BasicInfoTab(aircraft: $editedAircraft)
-                    .tabItem { Label("Basic", systemImage: "info.circle") }
-                    .tag(0)
+            VStack(spacing: 0) {
+                // Tab Picker at Top
+                Picker("Section", selection: $selectedTab) {
+                    Text("Basic").tag(0)
+                    Text("W&B").tag(1)
+                    Text("Stations").tag(2)
+                    Text("Envelope").tag(3)
+                    Text("Perf").tag(4)
+                }
+                .pickerStyle(.segmented)
+                .padding()
 
-                WeightBalanceTab(aircraft: $editedAircraft)
-                    .tabItem { Label("W&B", systemImage: "scalemass") }
-                    .tag(1)
+                // Tab Content
+                TabView(selection: $selectedTab) {
+                    BasicInfoTab(aircraft: $editedAircraft)
+                        .tag(0)
 
-                StationsTab(aircraft: $editedAircraft)
-                    .tabItem { Label("Stations", systemImage: "list.bullet") }
-                    .tag(2)
+                    WeightBalanceTab(aircraft: $editedAircraft)
+                        .tag(1)
 
-                EnvelopeTab(aircraft: $editedAircraft)
-                    .tabItem { Label("Envelope", systemImage: "chart.xyaxis.line") }
-                    .tag(3)
+                    StationsTab(aircraft: $editedAircraft)
+                        .tag(2)
 
-                PerformanceTab(aircraft: $editedAircraft)
-                    .tabItem { Label("Performance", systemImage: "gauge") }
-                    .tag(4)
+                    EnvelopeTab(aircraft: $editedAircraft)
+                        .tag(3)
+
+                    PerformanceTab(aircraft: $editedAircraft)
+                        .tag(4)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
             .navigationTitle(aircraft == nil ? "New Aircraft" : "Edit Aircraft")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -66,6 +74,7 @@ struct AircraftDetailView: View {
     }
 
     private var isValid: Bool {
+        // Require basic info only
         !editedAircraft.name.isEmpty &&
         !editedAircraft.registration.isEmpty
     }
@@ -84,21 +93,43 @@ struct BasicInfoTab: View {
 
     var body: some View {
         Form {
-            Section("Aircraft Information") {
-                TextField("Name/Make & Model", text: $aircraft.name)
+            Section {
+                TextField("Required", text: $aircraft.name)
                     .textContentType(.name)
+            } header: {
+                HStack {
+                    Text("Name/Make & Model")
+                    Text("*").foregroundStyle(.red)
+                }
+            }
 
-                TextField("Registration (N-Number)", text: $aircraft.registration)
+            Section {
+                TextField("Required", text: $aircraft.registration)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
+            } header: {
+                HStack {
+                    Text("Registration (N-Number)")
+                    Text("*").foregroundStyle(.red)
+                }
+            }
 
-                TextField("Type (e.g., C-172S)", text: $aircraft.type)
+            Section("Type (Optional)") {
+                TextField("e.g., C-172S, PA-28-180", text: $aircraft.type)
+            }
 
-                TextField("Notes (optional)", text: Binding(
+            Section("Notes (Optional)") {
+                TextField("Any additional notes", text: Binding(
                     get: { aircraft.notes ?? "" },
                     set: { aircraft.notes = $0.isEmpty ? nil : $0 }
                 ), axis: .vertical)
                 .lineLimit(3...6)
+            }
+
+            Section {
+                Text("Swipe left or tap 'W&B' above to add weight & balance data")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -111,6 +142,12 @@ struct WeightBalanceTab: View {
 
     var body: some View {
         Form {
+            Section {
+                Text("Enter your aircraft's empty weight and moment from the weight & balance form")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Empty Weight & Balance") {
                 HStack {
                     Text("Empty Weight")
@@ -118,6 +155,7 @@ struct WeightBalanceTab: View {
                     TextField("0", value: $aircraft.emptyWeight, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lbs")
                         .foregroundStyle(.secondary)
                 }
@@ -128,6 +166,7 @@ struct WeightBalanceTab: View {
                     TextField("0", value: $aircraft.emptyMoment, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lb-in")
                         .foregroundStyle(.secondary)
                 }
@@ -142,13 +181,14 @@ struct WeightBalanceTab: View {
                 }
             }
 
-            Section("Weight Limits") {
+            Section("Weight Limits (Optional)") {
                 HStack {
                     Text("Max Ramp")
                     Spacer()
                     TextField("Optional", value: $aircraft.maxRampWeight, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lbs")
                         .foregroundStyle(.secondary)
                 }
@@ -159,6 +199,7 @@ struct WeightBalanceTab: View {
                     TextField("Optional", value: $aircraft.maxTakeoffWeight, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lbs")
                         .foregroundStyle(.secondary)
                 }
@@ -169,6 +210,7 @@ struct WeightBalanceTab: View {
                     TextField("Optional", value: $aircraft.maxLandingWeight, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lbs")
                         .foregroundStyle(.secondary)
                 }
@@ -181,6 +223,7 @@ struct WeightBalanceTab: View {
                     TextField("0", value: $aircraft.usableFuelGallons, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("gal")
                         .foregroundStyle(.secondary)
                 }
@@ -191,6 +234,7 @@ struct WeightBalanceTab: View {
                     TextField("6.0", value: $aircraft.fuelDensityLbPerGal, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("lb/gal")
                         .foregroundStyle(.secondary)
                 }
@@ -203,14 +247,19 @@ struct WeightBalanceTab: View {
 
 struct StationsTab: View {
     @Binding var aircraft: Aircraft
-    @State private var showingAddStation = false
 
     var body: some View {
         List {
             Section {
+                Text("Define loading stations like Pilot, Passenger, Baggage with their arm distances from the datum")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
                 ForEach($aircraft.stations) { $station in
-                    VStack(alignment: .leading, spacing: 4) {
-                        TextField("Station Name", text: $station.name)
+                    VStack(alignment: .leading, spacing: 8) {
+                        TextField("Station Name (e.g., Pilot)", text: $station.name)
                             .font(.headline)
 
                         HStack {
@@ -231,22 +280,20 @@ struct StationsTab: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     }
+                    .padding(.vertical, 4)
                 }
                 .onDelete { indexSet in
                     aircraft.stations.remove(atOffsets: indexSet)
                 }
-            } header: {
-                HStack {
-                    Text("Stations")
-                    Spacer()
-                    Button {
-                        addStation()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                    }
+
+                Button {
+                    addStation()
+                } label: {
+                    Label("Add Station", systemImage: "plus.circle.fill")
+                        .foregroundStyle(.blue)
                 }
-            } footer: {
-                Text("Define loading stations (pilot, passenger, baggage, etc.) with their arm distance from the datum")
+            } header: {
+                Text("Stations (Optional)")
             }
         }
     }
@@ -261,19 +308,25 @@ struct StationsTab: View {
 
 struct EnvelopeTab: View {
     @Binding var aircraft: Aircraft
-    @State private var showingAddNormalPoint = false
-    @State private var showingAddUtilityPoint = false
 
     var body: some View {
         Form {
             Section {
+                Text("Define the CG envelope from your POH. Add points starting from the forward limit and going clockwise around the envelope")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Normal Category Envelope (Optional)") {
                 ForEach($aircraft.normalEnvelope.indices, id: \.self) { index in
                     HStack {
                         TextField("Weight", value: $aircraft.normalEnvelope[index].weightLb, format: .number)
                             .keyboardType(.decimalPad)
+                            .frame(width: 80)
                         Text("lbs @")
                         TextField("CG", value: $aircraft.normalEnvelope[index].cgIn, format: .number)
                             .keyboardType(.decimalPad)
+                            .frame(width: 80)
                         Text("in")
                     }
                 }
@@ -284,15 +337,12 @@ struct EnvelopeTab: View {
                 Button {
                     aircraft.normalEnvelope.append(EnvelopePoint())
                 } label: {
-                    Label("Add Point", systemImage: "plus.circle")
+                    Label("Add Envelope Point", systemImage: "plus.circle.fill")
+                        .foregroundStyle(.blue)
                 }
-            } header: {
-                Text("Normal Category Envelope")
-            } footer: {
-                Text("Define CG envelope points for normal category operations")
             }
 
-            Section {
+            Section("Utility Category (Optional)") {
                 if aircraft.utilityEnvelope == nil {
                     Button("Add Utility Category") {
                         aircraft.utilityEnvelope = []
@@ -302,9 +352,11 @@ struct EnvelopeTab: View {
                         HStack {
                             TextField("Weight", value: utilityEnvelope[index].weightLb, format: .number)
                                 .keyboardType(.decimalPad)
+                                .frame(width: 80)
                             Text("lbs @")
                             TextField("CG", value: utilityEnvelope[index].cgIn, format: .number)
                                 .keyboardType(.decimalPad)
+                                .frame(width: 80)
                             Text("in")
                         }
                     }
@@ -315,15 +367,14 @@ struct EnvelopeTab: View {
                     Button {
                         aircraft.utilityEnvelope?.append(EnvelopePoint())
                     } label: {
-                        Label("Add Point", systemImage: "plus.circle")
+                        Label("Add Point", systemImage: "plus.circle.fill")
+                            .foregroundStyle(.blue)
                     }
 
                     Button("Remove Utility Category", role: .destructive) {
                         aircraft.utilityEnvelope = nil
                     }
                 }
-            } header: {
-                Text("Utility Category Envelope (Optional)")
             }
         }
     }
@@ -336,6 +387,12 @@ struct PerformanceTab: View {
 
     var body: some View {
         Form {
+            Section {
+                Text("Enter performance data from your POH. All fields are optional")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Takeoff Performance") {
                 HStack {
                     Text("Ground Roll")
@@ -343,6 +400,7 @@ struct PerformanceTab: View {
                     TextField("Optional", value: $aircraft.performance.takeoffGroundRoll, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("ft")
                         .foregroundStyle(.secondary)
                 }
@@ -353,6 +411,7 @@ struct PerformanceTab: View {
                     TextField("Optional", value: $aircraft.performance.takeoffOver50ft, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("ft")
                         .foregroundStyle(.secondary)
                 }
@@ -365,6 +424,7 @@ struct PerformanceTab: View {
                     TextField("Optional", value: $aircraft.performance.landingGroundRoll, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("ft")
                         .foregroundStyle(.secondary)
                 }
@@ -375,12 +435,13 @@ struct PerformanceTab: View {
                     TextField("Optional", value: $aircraft.performance.landingOver50ft, format: .number)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
                     Text("ft")
                         .foregroundStyle(.secondary)
                 }
             }
 
-            Section {
+            Section("Cruise Performance (Optional)") {
                 ForEach($aircraft.performance.cruisePerformance) { $cruise in
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -423,12 +484,9 @@ struct PerformanceTab: View {
                 Button {
                     aircraft.performance.cruisePerformance.append(CruisePerformance())
                 } label: {
-                    Label("Add Cruise Setting", systemImage: "plus.circle")
+                    Label("Add Cruise Setting", systemImage: "plus.circle.fill")
+                        .foregroundStyle(.blue)
                 }
-            } header: {
-                Text("Cruise Performance (Optional)")
-            } footer: {
-                Text("Add cruise performance data for different power settings")
             }
         }
     }
