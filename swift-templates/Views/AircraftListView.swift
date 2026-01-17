@@ -79,7 +79,7 @@ struct AircraftListView: View {
                 )
                 .onTapGesture {
                     flightSession.selectAircraft(aircraft.id)
-                    flightSession.completeStep(.aircraft)
+                    // Note: Aircraft selection is part of flight setup, not a separate step
                 }
             }
             .onDelete { indexSet in
