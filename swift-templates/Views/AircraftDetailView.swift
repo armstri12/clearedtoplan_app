@@ -143,106 +143,132 @@ struct WeightBalanceTab: View {
     @Binding var aircraft: Aircraft
 
     var body: some View {
-        Form {
-            Section {
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 20) {
+                // Instructions
                 Text("Enter your aircraft's empty weight and moment from the weight & balance form")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            }
+                    .padding(.horizontal)
 
-            Section("Empty Weight & Balance") {
-                HStack {
-                    Text("Empty Weight")
-                    Spacer()
-                    TextField("0", value: $aircraft.emptyWeight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lbs")
-                        .foregroundStyle(.secondary)
-                }
+                // Empty Weight & Balance
+                GroupBox("Empty Weight & Balance") {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Empty Weight")
+                            Spacer()
+                            TextField("0", value: $aircraft.emptyWeight, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lbs")
+                                .foregroundStyle(.secondary)
+                        }
 
-                HStack {
-                    Text("Empty Moment")
-                    Spacer()
-                    TextField("0", value: $aircraft.emptyMoment, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lb-in")
-                        .foregroundStyle(.secondary)
-                }
+                        Divider()
 
-                if aircraft.emptyWeight > 0 {
-                    HStack {
-                        Text("Empty Arm")
-                        Spacer()
-                        Text(String(format: "%.2f in", aircraft.emptyArm))
-                            .foregroundStyle(.secondary)
+                        HStack {
+                            Text("Empty Moment")
+                            Spacer()
+                            TextField("0", value: $aircraft.emptyMoment, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lb-in")
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if aircraft.emptyWeight > 0 {
+                            Divider()
+                            HStack {
+                                Text("Empty Arm")
+                                Spacer()
+                                Text(String(format: "%.2f in", aircraft.emptyArm))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
+                    .padding(.vertical, 8)
                 }
+                .padding(.horizontal)
+
+                // Weight Limits
+                GroupBox("Weight Limits (Optional)") {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Max Ramp")
+                            Spacer()
+                            TextField("Optional", value: $aircraft.maxRampWeight, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lbs")
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Text("Max Takeoff")
+                            Spacer()
+                            TextField("Optional", value: $aircraft.maxTakeoffWeight, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lbs")
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Text("Max Landing")
+                            Spacer()
+                            TextField("Optional", value: $aircraft.maxLandingWeight, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lbs")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .padding(.horizontal)
+
+                // Fuel
+                GroupBox("Fuel") {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Usable Fuel")
+                            Spacer()
+                            TextField("0", value: $aircraft.usableFuelGallons, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("gal")
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Text("Fuel Density")
+                            Spacer()
+                            TextField("6.0", value: $aircraft.fuelDensityLbPerGal, format: .number)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                            Text("lb/gal")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .padding(.horizontal)
             }
-
-            Section("Weight Limits (Optional)") {
-                HStack {
-                    Text("Max Ramp")
-                    Spacer()
-                    TextField("Optional", value: $aircraft.maxRampWeight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lbs")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Text("Max Takeoff")
-                    Spacer()
-                    TextField("Optional", value: $aircraft.maxTakeoffWeight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lbs")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Text("Max Landing")
-                    Spacer()
-                    TextField("Optional", value: $aircraft.maxLandingWeight, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lbs")
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section("Fuel") {
-                HStack {
-                    Text("Usable Fuel")
-                    Spacer()
-                    TextField("0", value: $aircraft.usableFuelGallons, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("gal")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Text("Fuel Density")
-                    Spacer()
-                    TextField("6.0", value: $aircraft.fuelDensityLbPerGal, format: .number)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 100)
-                    Text("lb/gal")
-                        .foregroundStyle(.secondary)
-                }
-            }
+            .padding(.vertical)
         }
-        .scrollContentBackground(.visible)
         .scrollIndicators(.visible, axes: .vertical)
     }
 }
