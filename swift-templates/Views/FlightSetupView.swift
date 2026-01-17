@@ -16,6 +16,7 @@ struct FlightSetupView: View {
     @State private var flightDate = Date()
     @State private var selectedAircraftId: UUID?
     @State private var aircraft: [Aircraft] = []
+    @State private var showingAddAircraft = false
 
     var body: some View {
         NavigationStack {
@@ -32,13 +33,31 @@ struct FlightSetupView: View {
                     DatePicker("Date", selection: $flightDate, displayedComponents: .date)
                 }
 
-                Section("Aircraft") {
+                Section {
                     if aircraft.isEmpty {
-                        ContentUnavailableView(
-                            "No Aircraft",
-                            systemImage: "airplane",
-                            description: Text("Add an aircraft to continue")
-                        )
+                        VStack(spacing: 16) {
+                            Image(systemName: "airplane.circle")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.secondary)
+
+                            Text("No Aircraft")
+                                .font(.headline)
+
+                            Text("Add your first aircraft to continue")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            Button {
+                                showingAddAircraft = true
+                            } label: {
+                                Label("Add Aircraft", systemImage: "plus.circle.fill")
+                                    .font(.headline)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
                     } else {
                         ForEach(aircraft) { aircraft in
                             AircraftSelectionRow(
@@ -51,16 +70,27 @@ struct FlightSetupView: View {
                             }
                         }
                     }
+                } header: {
+                    HStack {
+                        Text("Aircraft")
+                        Spacer()
+                        if !aircraft.isEmpty {
+                            Button {
+                                showingAddAircraft = true
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle("New Flight")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    if flightSession.settings.planningMode == .advanced {
-                        Button("Skip") {
-                            dismiss()
-                        }
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
 
@@ -69,6 +99,12 @@ struct FlightSetupView: View {
                         startPlanning()
                     }
                     .disabled(!isValid)
+                }
+            }
+            .sheet(isPresented: $showingAddAircraft) {
+                AircraftFormView(aircraft: nil) { newAircraft in
+                    addAircraft(newAircraft)
+                    showingAddAircraft = false
                 }
             }
             .onAppear {
@@ -92,6 +128,17 @@ struct FlightSetupView: View {
 
         // Load aircraft list
         aircraft = StorageService.shared.loadAircraft()
+    }
+
+    private func addAircraft(_ newAircraft: Aircraft) {
+        // Save to storage
+        var allAircraft = StorageService.shared.loadAircraft()
+        allAircraft.append(newAircraft)
+        StorageService.shared.saveAircraft(allAircraft)
+
+        // Reload list and auto-select new aircraft
+        aircraft = allAircraft
+        selectedAircraftId = newAircraft.id
     }
 
     private func startPlanning() {
