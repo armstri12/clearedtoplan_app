@@ -141,14 +141,16 @@ struct BasicInfoTab: View {
 
 struct WeightBalanceTab: View {
     @Binding var aircraft: Aircraft
+    @State private var scrollOffset: CGFloat = 0
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            VStack(alignment: .leading, spacing: 20) {
-                // Instructions
-                Text("Enter your aircraft's empty weight and moment from the weight & balance form")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        GeometryReader { geometry in
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Instructions
+                    Text("Enter your aircraft's empty weight and moment from the weight & balance form")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     .padding(.horizontal)
 
                 // Empty Weight & Balance
@@ -266,10 +268,34 @@ struct WeightBalanceTab: View {
                     .padding(.vertical, 8)
                 }
                 .padding(.horizontal)
+
+                // Visual hint that more content exists below
+                HStack {
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .foregroundStyle(.blue.opacity(0.6))
+                        .imageScale(.small)
+                    Text("Scroll for more fields")
+                        .font(.caption2)
+                        .foregroundStyle(.blue.opacity(0.6))
+                    Spacer()
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 40)
+                }
+                .padding(.vertical)
             }
-            .padding(.vertical)
+            .scrollIndicators(.visible, axes: .vertical)
+            .scrollBounceBehavior(.basedOnSize)
+            .overlay(alignment: .trailing) {
+                // Custom always-visible scroll indicator
+                Capsule()
+                    .fill(.gray.opacity(0.3))
+                    .frame(width: 4)
+                    .padding(.trailing, 2)
+                    .padding(.vertical, 8)
+            }
         }
-        .scrollIndicators(.visible, axes: .vertical)
     }
 }
 
