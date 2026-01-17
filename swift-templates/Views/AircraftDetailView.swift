@@ -132,6 +132,7 @@ struct BasicInfoTab: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .scrollIndicators(.visible)
     }
 }
 
@@ -240,6 +241,7 @@ struct WeightBalanceTab: View {
                 }
             }
         }
+        .scrollIndicators(.visible)
     }
 }
 
@@ -296,6 +298,7 @@ struct StationsTab: View {
                 Text("Stations (Optional)")
             }
         }
+        .scrollIndicators(.visible)
     }
 
     private func addStation() {
@@ -377,6 +380,7 @@ struct EnvelopeTab: View {
                 }
             }
         }
+        .scrollIndicators(.visible)
     }
 }
 
@@ -489,6 +493,7 @@ struct PerformanceTab: View {
                 }
             }
         }
+        .scrollIndicators(.visible)
     }
 }
 
