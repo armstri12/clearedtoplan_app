@@ -102,7 +102,7 @@ struct FlightSetupView: View {
                 }
             }
             .sheet(isPresented: $showingAddAircraft) {
-                AircraftFormView(aircraft: nil) { newAircraft in
+                AircraftDetailView(aircraft: nil) { newAircraft in
                     addAircraft(newAircraft)
                     showingAddAircraft = false
                 }
