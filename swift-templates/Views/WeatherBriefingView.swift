@@ -2,97 +2,148 @@
 //  WeatherBriefingView.swift
 //  ClearedToPlan
 //
-//  Weather briefing with METAR/TAF
+//  Weather briefing with METAR/TAF (always accessible)
 //
 
 import SwiftUI
 
 struct WeatherBriefingView: View {
     @EnvironmentObject var flightSession: FlightSessionViewModel
-
-    var body: some View {
-        NavigationStack {
-            if flightSession.canAccessStep(.weather) {
-                WeatherBriefingContentView()
-            } else {
-                WorkflowGuardView(step: .weather)
-            }
-        }
-    }
-}
-
-struct WeatherBriefingContentView: View {
-    @EnvironmentObject var flightSession: FlightSessionViewModel
     @State private var stationId: String = ""
     @State private var isLoading = false
     @State private var weatherData: String?
     @State private var errorMessage: String?
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                Text("Weather Briefing")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                // Station Input
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Station Identifier")
-                        .font(.headline)
-
-                    HStack {
-                        TextField("ICAO (e.g., KXXX)", text: $stationId)
-                            .textInputAutocapitalization(.characters)
-                            .autocorrectionDisabled()
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                        Button {
-                            fetchWeather()
-                        } label: {
-                            if isLoading {
-                                ProgressView()
-                            } else {
-                                Image(systemName: "arrow.down.circle.fill")
-                            }
-                        }
-                        .font(.title2)
-                        .disabled(stationId.isEmpty || isLoading)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Quick airport buttons if flight setup complete
+                    if flightSession.session.phase1Complete {
+                        quickAirportButtons
                     }
-                }
 
-                // Weather Display
-                if let weather = weatherData {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("METAR")
+                    // Station Input
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Station Identifier")
                             .font(.headline)
 
-                        Text(weather)
-                            .font(.system(.body, design: .monospaced))
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        HStack {
+                            TextField("ICAO (e.g., KPDX)", text: $stationId)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                            Button {
+                                fetchWeather()
+                            } label: {
+                                if isLoading {
+                                    ProgressView()
+                                } else {
+                                    Image(systemName: "arrow.down.circle.fill")
+                                }
+                            }
+                            .font(.title2)
+                            .disabled(stationId.isEmpty || isLoading)
+                        }
+                    }
+
+                    // Weather Display
+                    if let weather = weatherData {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("METAR")
+                                .font(.headline)
+
+                            Text(weather)
+                                .font(.system(.body, design: .monospaced))
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.systemGray6))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                            Text("Last updated: \(Date(), style: .time)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
                     }
                 }
-
-                if let error = errorMessage {
-                    Text(error)
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
-                }
-
-                if weatherData != nil {
-                    Button("Mark Complete") {
-                        flightSession.completeStep(.weather)
+                .padding()
+            }
+            .navigationTitle("Weather")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
                     }
-                    .buttonStyle(.borderedProminent)
                 }
             }
-            .padding()
+            .onAppear {
+                // Auto-populate departure airport if available
+                if let departure = flightSession.session.departureAirport,
+                   stationId.isEmpty {
+                    stationId = departure
+                    fetchWeather()
+                }
+            }
         }
-        .navigationTitle("Weather")
+    }
+
+    // Quick buttons for departure and destination
+    private var quickAirportButtons: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Your Flight")
+                .font(.headline)
+
+            HStack(spacing: 12) {
+                if let departure = flightSession.session.departureAirport {
+                    Button {
+                        stationId = departure
+                        fetchWeather()
+                    } label: {
+                        VStack {
+                            Text("Departure")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(departure)
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+
+                if let destination = flightSession.session.destinationAirport {
+                    Button {
+                        stationId = destination
+                        fetchWeather()
+                    } label: {
+                        VStack {
+                            Text("Destination")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(destination)
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
     }
 
     private func fetchWeather() {
