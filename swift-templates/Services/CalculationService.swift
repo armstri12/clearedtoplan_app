@@ -41,40 +41,6 @@ struct CalculationService {
         return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
     }
 
-    /// Interpolate performance data based on altitude
-    static func interpolatePerformance(altitude: Double, data: [PerformancePoint]) -> Double? {
-        guard !data.isEmpty else { return nil }
-
-        // Sort by altitude
-        let sortedData = data.sorted { $0.altitude < $1.altitude }
-
-        // Find surrounding points
-        if altitude <= sortedData.first!.altitude {
-            return sortedData.first!.distance
-        }
-
-        if altitude >= sortedData.last!.altitude {
-            return sortedData.last!.distance
-        }
-
-        for i in 0..<(sortedData.count - 1) {
-            let lower = sortedData[i]
-            let upper = sortedData[i + 1]
-
-            if altitude >= lower.altitude && altitude <= upper.altitude {
-                return interpolate(
-                    x: altitude,
-                    x1: lower.altitude,
-                    y1: lower.distance,
-                    x2: upper.altitude,
-                    y2: upper.distance
-                )
-            }
-        }
-
-        return nil
-    }
-
     // MARK: - Navigation Calculations
 
     /// Calculate ground speed
